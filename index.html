@@ -1,0 +1,134 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#087e8b">
+<title>Neonatal Jaundice Egypt</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f2f7f8;color:#19323b;font-family:Tahoma,Arial,sans-serif}
+header{background:#087e8b;color:white;padding:25px 18px;text-align:center}
+header h1{font-size:23px;margin:0 0 8px}
+header p{margin:0;font-size:13px}
+main{max-width:650px;margin:20px auto;padding:0 14px}
+.card{background:white;border-radius:15px;padding:20px;margin-bottom:15px;box-shadow:0 3px 14px #173d4b12}
+h2{font-size:18px;color:#087e8b;margin:0 0 18px}
+label{display:block;font-size:14px;margin:13px 0 7px}
+input,select{width:100%;padding:12px;border:1px solid #ccdadd;border-radius:9px;font-size:16px;background:white}
+button{width:100%;padding:14px;background:#087e8b;color:white;border:0;border-radius:10px;font-size:16px;margin-top:18px}
+.result{background:#eaf6f6;border-radius:10px;padding:15px;margin-top:15px;line-height:2}
+.notice{font-size:12px;color:#765b22;background:#fff6df;padding:12px;border-radius:9px;line-height:1.8}
+footer{text-align:center;color:#70858b;font-size:12px;padding:20px}
+</style>
+</head>
+<body>
+<header>
+<h1>Neonatal Jaundice Egypt</h1>
+<p>حاسبة ومتابعة الصفراء عند حديثي الولادة</p>
+</header>
+
+<main>
+<div class="card">
+<h2>بيانات الطفل</h2>
+
+<label>تاريخ ووقت الولادة</label>
+<input type="datetime-local" id="birth">
+
+<label>عمر الحمل - أسابيع</label>
+<input type="number" id="weeks" min="35" max="45" placeholder="مثلاً 38">
+
+<label>عمر الحمل - أيام إضافية</label>
+<input type="number" id="days" min="0" max="6" value="0">
+
+<label>وزن الطفل عند الولادة (جرام)</label>
+<input type="number" id="weight" placeholder="مثلاً 3200">
+
+</div>
+
+<div class="card">
+<h2>بيانات تحليل البيليروبين</h2>
+
+<label>تاريخ ووقت سحب العينة</label>
+<input type="datetime-local" id="sample">
+
+<label>البيليروبين الكلي TSB</label>
+<input type="number" id="bilirubin" step="0.1" min="0" placeholder="أدخل النتيجة">
+
+<label>وحدة القياس</label>
+<select id="unit">
+<option value="mg">mg/dL</option>
+<option value="umol">µmol/L</option>
+</select>
+
+<button onclick="calculate()">احسب البيانات</button>
+
+<div id="result"></div>
+</div>
+
+<div class="card">
+<h2>عوامل الخطورة</h2>
+<div class="notice">
+هذه قائمة أولية لاستكمال تقييم الطبيب، وليست أداة لتشخيص أو استبعاد عوامل الخطورة.
+</div>
+<label><input type="checkbox" id="hemolysis"> اشتباه انحلال الدم</label>
+<label><input type="checkbox" id="g6pd"> نقص G6PD</label>
+<label><input type="checkbox" id="sepsis"> اشتباه إنتان</label>
+<label><input type="checkbox" id="albumin"> نقص الألبومين</label>
+</div>
+
+<div class="notice">
+نسخة تجريبية غير معتمدة للاستخدام السريري.
+لا تحدد هذه النسخة عتبات العلاج ولا تصدر قرارات علاجية.
+يجب الرجوع إلى الطبيب والدليل الإكلينيكي المعتمد.
+</div>
+</main>
+
+<footer>Neonatal Jaundice Egypt | Prototype v0.1</footer>
+
+<script>
+function calculate(){
+ const birth=document.getElementById('birth').value;
+ const sample=document.getElementById('sample').value;
+ const weeks=Number(document.getElementById('weeks').value);
+ const days=Number(document.getElementById('days').value);
+ const weight=Number(document.getElementById('weight').value);
+ const value=Number(document.getElementById('bilirubin').value);
+ const unit=document.getElementById('unit').value;
+ const out=document.getElementById('result');
+
+ if(!birth||!sample||!weeks||!weight||!value||
+    days<0||days>6||weeks<35||weeks>45||weight<=0||value<=0){
+   out.innerHTML='<div class="result">يرجى مراجعة البيانات. هذه النسخة مخصصة مبدئيًا لعمر حمل 35 أسبوعًا فأكثر.</div>';
+   return;
+ }
+
+ const b=new Date(birth);
+ const s=new Date(sample);
+ const age=(s-b)/3600000;
+
+ if(!Number.isFinite(age)||age<0||age>672){
+   out.innerHTML='<div class="result">تاريخ العينة غير صحيح أو خارج نطاق عمر البرنامج (28 يومًا).</div>';
+   return;
+ }
+
+ const mg=unit==='umol'?value/17.104:value;
+ const umol=mg*17.104;
+
+ out.innerHTML=`
+ <div class="result">
+ <b>نتيجة الحساب الأولي</b><br>
+ عمر الطفل وقت التحليل: ${age.toFixed(1)} ساعة<br>
+ عمر الحمل: ${weeks} أسبوع و${days} يوم<br>
+ الوزن عند الولادة: ${weight} جرام<br>
+ البيليروبين الكلي: ${mg.toFixed(2)} mg/dL<br>
+ ما يعادل: ${umol.toFixed(1)} µmol/L
+ <hr>
+ <b>ملاحظة:</b> هذه تحويلات وحسابات بيانات فقط.
+ لا توجد عتبات علاج أو تقييم خطورة في هذه النسخة.
+ </div>`;
+}
+</script>
+</body>
+</html>
